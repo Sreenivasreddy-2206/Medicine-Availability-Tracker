@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { API_URL } from "./config";
 
 // MEDICINE PLACEHOLDERS CYCLING FOR SEARCH BAR
 const PLACEHOLDERS = [
@@ -379,7 +380,7 @@ function App() {
 
     setIsAuthLoading(true);
     try {
-      const res = await fetch('/auth/register', {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -410,7 +411,7 @@ function App() {
     e.preventDefault();
     setIsAuthLoading(true);
     try {
-      const res = await fetch('/auth/login', {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: signInEmail, password: signInPassword })
@@ -447,7 +448,7 @@ function App() {
 
     setIsOtpSending(true);
     try {
-      const res = await fetch('/auth/send-otp', {
+      const res = await fetch(`${API_URL}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: adminEmail })
@@ -474,7 +475,7 @@ function App() {
 
     setIsAuthLoading(true);
     try {
-      const res = await fetch('/auth/login', {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -528,7 +529,7 @@ function App() {
     setExpandedCardId(null);
 
     try {
-      const res = await fetch(`/medicine/search/${encodeURIComponent(query)}`);
+      const res = await fetch(`${API_URL}/medicine/search/${encodeURIComponent(query)}`);
       const medicines = await res.json();
       if (!res.ok) throw new Error(medicines.error || 'Search failed');
 
@@ -567,12 +568,12 @@ function App() {
     setExpandedCardId(null);
 
     try {
-      const res = await fetch(`/pharmacy/nearby?lat=${userCoords.lat}&lng=${userCoords.lng}`);
+      const res = await fetch(`${API_URL}/pharmacy/nearby?lat=${userCoords.lat}&lng=${userCoords.lng}`);
       const pharmacies = await res.json();
       if (!res.ok) throw new Error('Nearby query failed');
 
       // Fetch medicines to show nearby inventory
-      const medRes = await fetch('/medicine/');
+      const medRes = await fetch(`${API_URL}/medicine/`);
       const allMedicines = await medRes.json();
 
       const results = [];
@@ -615,7 +616,7 @@ function App() {
   const loadAlternatives = async () => {
     setLoadingAlternatives(true);
     try {
-      const res = await fetch('/medicine');
+      const res = await fetch(`${API_URL}/medicine`);
       const all = await res.json();
       // Filter in stock ones
       const available = all.filter((m) => m.quantity > 5);
@@ -640,9 +641,9 @@ function App() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [uRes, pRes, mRes] = await Promise.all([
-        fetch('/admin/users', { headers }),
-        fetch('/admin/pharmacies', { headers }),
-        fetch('/medicine')
+        fetch(`${API_URL}/admin/users`, { headers }),
+        fetch(`${API_URL}/admin/pharmacies`, { headers }),
+        fetch(`${API_URL}/medicine`)
       ]);
       const [users, pharmacies, medicines] = await Promise.all([
         uRes.json(),
@@ -668,15 +669,15 @@ function App() {
 
     try {
       if (adminActiveTab === 'users') {
-        const res = await fetch('/admin/users', { headers });
+        const res = await fetch(`${API_URL}/admin/users`, { headers });
         const data = await res.json();
         setAdminUsers(Array.isArray(data) ? data : []);
       } else if (adminActiveTab === 'pharmacies') {
-        const res = await fetch('/admin/pharmacies', { headers });
+        const res = await fetch(`${API_URL}/admin/pharmacies`, { headers });
         const data = await res.json();
         setAdminPharmacies(Array.isArray(data) ? data : []);
       } else if (adminActiveTab === 'medicines') {
-        const res = await fetch('/admin/medicines', { headers });
+        const res = await fetch(`${API_URL}/admin/medicines`, { headers });
         const data = await res.json();
         setAdminMedicines(Array.isArray(data) ? data : []);
       }
@@ -697,9 +698,9 @@ function App() {
 
     try {
       let endpoint = '';
-      if (type === 'user') endpoint = `/admin/user/${id}`;
-      if (type === 'pharmacy') endpoint = `/admin/pharmacy/${id}`;
-      if (type === 'medicine') endpoint = `/medicine/${id}`;
+      if (type === 'user') endpoint = `${API_URL}/admin/user/${id}`;
+      if (type === 'pharmacy') endpoint = `${API_URL}/admin/pharmacy/${id}`;
+      if (type === 'medicine') endpoint = `${API_URL}/medicine/${id}`;
 
       const res = await fetch(endpoint, { method: 'DELETE', headers });
       const data = await res.json();
@@ -756,7 +757,7 @@ function App() {
 
       const seeded = [];
       for (const p of pharmaciesData) {
-        const res = await fetch('/pharmacy', {
+        const res = await fetch(`${API_URL}/pharmacy`, {
           method: 'POST',
           headers,
           body: JSON.stringify(p)
@@ -788,7 +789,7 @@ function App() {
     };
 
     try {
-      const resPharm = await fetch('/admin/pharmacies', { headers });
+      const resPharm = await fetch(`${API_URL}/admin/pharmacies`, { headers });
       const pharmacies = await resPharm.json();
 
       if (!Array.isArray(pharmacies) || pharmacies.length === 0) {
@@ -825,7 +826,7 @@ function App() {
             pharmacyId: pharm._id
           };
 
-          const res = await fetch('/medicine', {
+          const res = await fetch(`${API_URL}/medicine`, {
             method: 'POST',
             headers,
             body: JSON.stringify(medBody)
